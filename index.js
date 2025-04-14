@@ -82,29 +82,23 @@ function findDraftProductsInBlogs(productsMap) {
 function findDraftProductsInTemplates(productsMap) {
   // Find all product template files
   const templatePath = path.join(path.dirname(__dirname), 'Theme', 'templates');
-  console.log('Looking for templates in:', templatePath);
   
   const templateFiles = fs.readdirSync(templatePath)
     .filter(file => file.startsWith('product.') && file.endsWith('.json'))
     .map(file => path.join(templatePath, file));
   
-  console.log('Found template files:', templateFiles);
-  
   const draftProductsInTemplates = [];
   
   templateFiles.forEach(templateFile => {
     try {
-      console.log('Processing template file:', templateFile);
       const templateContent = fs.readFileSync(templateFile, 'utf8');
       const templateData = JSON.parse(templateContent);
       
       // Extract product handles from settings
       const productHandles = extractProductHandlesFromTemplate(templateData);
-      console.log('Found product handles:', productHandles);
       
       // Check each product handle
       productHandles.forEach(handle => {
-        console.log('Checking handle:', handle, 'Status:', productsMap[handle]);
         if (productsMap[handle] === 'Draft') {
           draftProductsInTemplates.push({
             templateFile: path.basename(templateFile),
@@ -170,24 +164,39 @@ function printResults(blogDraftProducts, templateDraftProducts) {
   const blogPercentage = ((blogsWithDrafts / totalBlogs) * 100).toFixed(1);
   const templatePercentage = ((templatesWithDrafts / totalTemplates) * 100).toFixed(1);
 
-  console.log(`Found ${blogsWithDrafts} blogs with draft products (${blogsWithDrafts} out of ${totalBlogs} blogs), and Found ${templatesWithDrafts} Product Templates with draft products (${templatesWithDrafts} out of ${totalTemplates} templates).`);
-  console.log(`\nPercentage Analysis:`);
-  console.log(`- ${blogPercentage}% of blogs have draft products (${blogsWithDrafts} out of ${totalBlogs} blogs)`);
-  console.log(`- ${templatePercentage}% of product templates have draft products (${templatesWithDrafts} out of ${totalTemplates} templates)`);
+  // ANSI color codes
+  const colors = {
+    reset: '\x1b[0m',
+    red: '\x1b[31m',
+    green: '\x1b[32m',
+    yellow: '\x1b[33m',
+    blue: '\x1b[34m',
+    magenta: '\x1b[35m',
+    cyan: '\x1b[36m',
+    bold: '\x1b[1m'
+  };
+
+  console.log(`\n${colors.bold}${colors.cyan}📊 DRAFT PRODUCT ANALYSIS | By: Cristobal A. | Hexclad | 2025${colors.reset}\n`);
+  console.log(`${colors.yellow}🔍 Found ${colors.bold}${blogsWithDrafts}${colors.reset}${colors.yellow} Blogs with draft products, and ${colors.bold}${templatesWithDrafts}${colors.reset}${colors.yellow} Product Templates with draft products.${colors.reset}\n`);
+  
+  console.log(`${colors.bold}📈 Percentage Analysis:${colors.reset}`);
+  console.log(`${colors.red}⚠️  ${blogPercentage}% of blogs have draft products (${blogsWithDrafts} out of ${totalBlogs} blogs)${colors.reset}`);
+  console.log(`${colors.red}⚠️  ${templatePercentage}% of product templates have draft products (${templatesWithDrafts} out of ${totalTemplates} templates)${colors.reset}\n`);
   
   if (blogDraftProducts.length > 0) {
-    console.log('\nBlog Titles with Draft products:');
+    console.log(`${colors.bold}${colors.blue}📝 Blog Titles with Draft products:${colors.reset}`);
     blogDraftProducts.forEach(item => {
-      console.log(`- Blog: ${item.blogTitle}, Product: ${item.productHandle}`);
+      console.log(`${colors.yellow}  • Blog: ${colors.reset}${item.blogTitle}${colors.yellow}, Product: ${colors.reset}${item.productHandle}`);
     });
   }
   
   if (templateDraftProducts.length > 0) {
-    console.log('\nProduct Templates with Draft products:');
+    console.log(`\n${colors.bold}${colors.blue}📋 Product Templates with Draft products:${colors.reset}`);
     templateDraftProducts.forEach(item => {
-      console.log(`- Template: ${item.templateFile}, Product: ${item.productHandle}`);
+      console.log(`${colors.yellow}  • Template: ${colors.reset}${item.templateFile}${colors.yellow}, Product: ${colors.reset}${item.productHandle}`);
     });
   }
+  console.log(`\n${colors.bold}${colors.green}✨ Analysis Complete${colors.reset}\n`);
 }
 
 // Run the main function
