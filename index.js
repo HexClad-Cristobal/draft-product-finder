@@ -153,7 +153,27 @@ function extractProductHandlesFromTemplate(templateData) {
 
 // Print results
 function printResults(blogDraftProducts, templateDraftProducts) {
-  console.log(`Found ${blogDraftProducts.length} products in draft in Blogs, and Found ${templateDraftProducts.length} products in Product Templates in draft.`);
+  // Calculate total number of blogs and templates
+  const totalBlogs = fs.readFileSync(BLOG_POSTS_CSV_PATH, 'utf8')
+    .split('\n')
+    .filter(line => line.trim() && !line.startsWith('"ID"')) // Exclude header
+    .length;
+  
+  const totalTemplates = fs.readdirSync(path.join(path.dirname(__dirname), 'Theme', 'templates'))
+    .filter(file => file.startsWith('product.') && file.endsWith('.json'))
+    .length;
+
+  // Calculate percentages
+  const blogsWithDrafts = new Set(blogDraftProducts.map(item => item.blogTitle)).size;
+  const templatesWithDrafts = new Set(templateDraftProducts.map(item => item.templateFile)).size;
+  
+  const blogPercentage = ((blogsWithDrafts / totalBlogs) * 100).toFixed(1);
+  const templatePercentage = ((templatesWithDrafts / totalTemplates) * 100).toFixed(1);
+
+  console.log(`Found ${blogsWithDrafts} blogs with draft products (${blogsWithDrafts} out of ${totalBlogs} blogs), and Found ${templatesWithDrafts} Product Templates with draft products (${templatesWithDrafts} out of ${totalTemplates} templates).`);
+  console.log(`\nPercentage Analysis:`);
+  console.log(`- ${blogPercentage}% of blogs have draft products (${blogsWithDrafts} out of ${totalBlogs} blogs)`);
+  console.log(`- ${templatePercentage}% of product templates have draft products (${templatesWithDrafts} out of ${totalTemplates} templates)`);
   
   if (blogDraftProducts.length > 0) {
     console.log('\nBlog Titles with Draft products:');
